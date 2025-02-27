@@ -1,22 +1,16 @@
-const API_URL = "https://your-api-endpoint.com/submit"; // Replace with your actual API URL
+import axios from "axios";
 
-export const submitTrackerData = async (data) => {
+const BACKEND_API_URL = "http://localhost:5000/api/schedule"; // Change this when deploying
+
+export const submitTrackerData = async (formData) => {
+    console.log(formData);
     try {
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
+        const response = await axios.post(BACKEND_API_URL, formData, {
+            headers: { "Content-Type": "application/json" }, // ✅ Ensure JSON header
         });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        return await response.json();
+        return response.data;
     } catch (error) {
-        console.error("Error submitting data:", error);
+        console.error("Error submitting tracker data:", error.response?.data || error.message);
         throw error;
     }
 };
