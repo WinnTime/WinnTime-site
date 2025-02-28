@@ -25,8 +25,8 @@ const TrackerApp = () => {
             const result = await submitTrackerData(formData);
             alert("Form submitted successfully!");
             console.log("API Response:", result);
-            console.log("API Response:", result.schedule["stop-schedule"]);
-            setSchedule(result.schedule["stop-schedule"]);
+            // console.log("API Response:", result.schedule["stop-schedule"]);
+            setSchedule(result["stop-schedule"]);
             // Clear form after successful submission
             setStops("");
             setRoutes("");
