@@ -1,5 +1,5 @@
 import webpush from "web-push";
-import {VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY} from "./config/dotenvconfig.js";
+import {VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY} from "./config/dotenvConfig.js";
 const VAPID_KEYS = {
   publicKey: VAPID_PUBLIC_KEY,
   privateKey: VAPID_PRIVATE_KEY,

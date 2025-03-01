@@ -3,7 +3,8 @@ import cors from "cors";
 import scheduleRoutes from "./routes/scheduleRoutes.js";
 import { addSubscription } from "./subscriptionManager.js";
 import { VAPID_KEYS } from "./webPushConfig.js";
-import { PORT } from "./config/dotenvconfig.js";
+import { PORT } from "./config/dotenvConfig.js";
+import "./scheduler.js";
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use("/api/schedule", scheduleRoutes);
 app.post("/subscribe", (req, res) => {
   const subscription = req.body;
   addSubscription(subscription);
+  console.log("New Subscription Received:", subscription); // ✅ Log subscription
   res.status(201).json({ message: "Subscription added successfully" });
 });
 
