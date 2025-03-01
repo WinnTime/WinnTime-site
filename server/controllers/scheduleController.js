@@ -27,9 +27,9 @@ const fetchScheduleForStop = async (stops) => {
                 stop.earlyMinutes = delayMinutes < 0 ? Math.abs(delayMinutes) : 0; // Store as positive value
         
                 if (delayMinutes > 0) {
-                    message += `🚨 Route ${routeSchedule.route.number} - ${routeSchedule.route.name} (${stop.variant.name}) scheduled at ${arrivalScheduled.toLocaleTimeString()} is **delayed** by ${delayMinutes} minutes.\n`;
+                    message += `🚨 Route ${routeSchedule.route.number} - ${routeSchedule.route.name} (${stop.variant.name}) scheduled at ${arrivalScheduled.toLocaleTimeString()} is *delayed*, and will arive in ${delayMinutes} minutes  \n`;
                 } else if (delayMinutes < 0) {
-                    message += `✅ Route ${routeSchedule.route.number} - ${routeSchedule.route.name} (${stop.variant.name}) scheduled at ${arrivalScheduled.toLocaleTimeString()} is **ahead of schedule** by ${Math.abs(delayMinutes)} minutes.\n`;
+                    message += `✅ Route ${routeSchedule.route.number} - ${routeSchedule.route.name} (${stop.variant.name}) scheduled at ${arrivalScheduled.toLocaleTimeString()} is *early*, and will arive in ${Math.abs(delayMinutes)} minutes.\n`;
                 }
             });
         });
