@@ -1,16 +1,24 @@
-const ScheduleList = ({ schedule }) => {
-    if (!schedule) return null; 
+import { useEffect, useState } from "react";
 
-    console.log(schedule);
+const ScheduleList = ({ schedule }) => {
+    const [currentSchedule, setCurrentSchedule] = useState(schedule);
+
+    useEffect(() => {
+        setCurrentSchedule(schedule);
+    }, [schedule]); // Update state when schedule prop changes
+
+    if (!currentSchedule) return null;
+
+    console.log(currentSchedule);
 
     return (
         <div>
-            <h2>Schedule for {schedule.stop.name}</h2>
-            
-            {schedule["route-schedules"].map((routeSchedule, index) => (
+            <h2>Schedule for {currentSchedule.stop.name}</h2>
+
+            {currentSchedule["route-schedules"].map((routeSchedule, index) => (
                 <div key={index}>
                     <h3>Route {routeSchedule.route.number}: {routeSchedule.route.name}</h3>
-                    
+
                     <ul>
                         {routeSchedule["scheduled-stops"].map((stop, stopIndex) => {
                             const arrivalScheduled = stop.times.arrival.scheduled ? new Date(stop.times.arrival.scheduled) : null;
@@ -33,7 +41,7 @@ const ScheduleList = ({ schedule }) => {
                                     <div>
                                         <h3>Variant: {stop.variant?.key || "N/A"} - {stop.variant?.name || "N/A"}</h3>
                                     </div>
-                       
+
                                     <div>
                                         <strong>Arrival Scheduled:</strong> {arrivalScheduled ? arrivalScheduled.toLocaleTimeString() : "N/A"} <br />
                                         <strong>Arrival Estimated:</strong> {arrivalEstimated ? arrivalEstimated.toLocaleTimeString() : "N/A"} <br />

@@ -44,7 +44,7 @@ const fetchScheduleAndNotify = async () => {
 };
 
 // Schedule the function to run every 30 seconds
-cron.schedule("*/50 * * * * *", fetchScheduleAndNotify);
+//cron.schedule("*/50 * * * * *", fetchScheduleAndNotify);
 
 const sendPushNotification = (message) => {
   const subscriptions = getSubscriptions(); // Fetch user subscriptions from storage
