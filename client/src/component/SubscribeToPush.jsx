@@ -102,7 +102,7 @@ const SubscribeToPush = () => {
   };
 
   return (
-    <div>
+    <div className="flex gap-4 flex-col items-start p-3 rounded-xl bg-neutral-700">
       <h2>Push Notifications</h2>
       <button onClick={subscribeToPush} disabled={isSubscribed}>
         {isSubscribed ? "Subscribed" : "Enable Push Notifications"}

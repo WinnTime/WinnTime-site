@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import TrackerApp from './component/tracker'
-import SubscribeToPush from "./component/SubscribeToPush";
 import './App.css'
 
 function App() {
@@ -8,8 +7,8 @@ function App() {
 
   return (
     <>
-      <div className='flex justify-center'>
-      <SubscribeToPush />
+      <div className='flex justify-center items-center'>
+      
         <TrackerApp />
       </div>
 

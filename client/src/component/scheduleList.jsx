@@ -12,59 +12,96 @@ const ScheduleList = ({ schedule }) => {
     console.log(currentSchedule);
 
     return (
-        <div>
-            <h2>Schedule for {currentSchedule.stop.name}</h2>
-
+        <div className="p-4 mt-36">
+            <h2 className="text-xl font-bold mb-4">Schedule for {currentSchedule.stop.name}</h2>
             {currentSchedule["route-schedules"].map((routeSchedule, index) => (
-                <div key={index}>
-                    <h3>Route {routeSchedule.route.number}: {routeSchedule.route.name}</h3>
+                <div key={index} className="mb-6">
+                    <h3 className="text-lg font-semibold mb-2">
+                        Route {routeSchedule.route.number}: {routeSchedule.route.name}
+                    </h3>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full border border-neutral-900">
+                            <thead>
+                                <tr className="bg-neutral-900">
+                                    <th className="border border-neutral-900 px-4 py-2">Variant</th>
+                                    <th className="border border-neutral-900 px-4 py-2">Arrival Scheduled</th>
+                                    <th className="border border-neutral-900 px-4 py-2">Arrival Estimated</th>
+                                    <th className="border border-neutral-900 px-4 py-2">Arrival Delay</th>
+                                    <th className="border border-neutral-900 px-4 py-2">Departure Scheduled</th>
+                                    <th className="border border-neutral-900 px-4 py-2">Departure Estimated</th>
+                                    <th className="border border-neutral-900 px-4 py-2">Departure Delay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {routeSchedule["scheduled-stops"].map((stop, stopIndex) => {
+                                    const arrivalScheduled = stop.times.arrival.scheduled
+                                        ? new Date(stop.times.arrival.scheduled)
+                                        : null;
+                                    const arrivalEstimated = stop.times.arrival.estimated
+                                        ? new Date(stop.times.arrival.estimated)
+                                        : null;
+                                    const departureScheduled = stop.times.departure.scheduled
+                                        ? new Date(stop.times.departure.scheduled)
+                                        : null;
+                                    const departureEstimated = stop.times.departure.estimated
+                                        ? new Date(stop.times.departure.estimated)
+                                        : null;
 
-                    <ul>
-                        {routeSchedule["scheduled-stops"].map((stop, stopIndex) => {
-                            const arrivalScheduled = stop.times.arrival.scheduled ? new Date(stop.times.arrival.scheduled) : null;
-                            const arrivalEstimated = stop.times.arrival.estimated ? new Date(stop.times.arrival.estimated) : null;
+                                    const arrivalDelay =
+                                        arrivalEstimated && arrivalScheduled
+                                            ? Math.round((arrivalEstimated - arrivalScheduled) / (1000 * 60))
+                                            : null;
 
-                            const departureScheduled = stop.times.departure.scheduled ? new Date(stop.times.departure.scheduled) : null;
-                            const departureEstimated = stop.times.departure.estimated ? new Date(stop.times.departure.estimated) : null;
+                                    const departureDelay =
+                                        departureEstimated && departureScheduled
+                                            ? Math.round((departureEstimated - departureScheduled) / (1000 * 60))
+                                            : null;
 
-                            // Calculate Delay in Minutes
-                            const arrivalDelay = arrivalEstimated && arrivalScheduled
-                                ? Math.round((arrivalEstimated - arrivalScheduled) / (1000 * 60))
-                                : null;
-
-                            const departureDelay = departureEstimated && departureScheduled
-                                ? Math.round((departureEstimated - departureScheduled) / (1000 * 60))
-                                : null;
-
-                            return (
-                                <li key={stopIndex}>
-                                    <div>
-                                        <h3>Variant: {stop.variant?.key || "N/A"} - {stop.variant?.name || "N/A"}</h3>
-                                    </div>
-
-                                    <div>
-                                        <strong>Arrival Scheduled:</strong> {arrivalScheduled ? arrivalScheduled.toLocaleTimeString() : "N/A"} <br />
-                                        <strong>Arrival Estimated:</strong> {arrivalEstimated ? arrivalEstimated.toLocaleTimeString() : "N/A"} <br />
-                                        {arrivalDelay !== null && (
-                                            <strong style={{ color: arrivalDelay > 0 ? "red" : "green" }}>
-                                                {arrivalDelay > 0 ? `Delayed by ${arrivalDelay} mins` : "On Time"}
-                                            </strong>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <strong>Departure Scheduled:</strong> {departureScheduled ? departureScheduled.toLocaleTimeString() : "N/A"} <br />
-                                        <strong>Departure Estimated:</strong> {departureEstimated ? departureEstimated.toLocaleTimeString() : "N/A"} <br />
-                                        {departureDelay !== null && (
-                                            <strong style={{ color: departureDelay > 0 ? "red" : "green" }}>
-                                                {departureDelay > 0 ? `Delayed by ${departureDelay} mins` : "On Time"}
-                                            </strong>
-                                        )}
-                                    </div>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                                    return (
+                                        <tr key={stopIndex} className="border-t border-neutral-900 odd:bg-neutral-700 even:bg-neutral-800">
+                                            <td className="border border-neutral-900  px-4 py-2">
+                                                {stop.variant?.key || "N/A"} - {stop.variant?.name || "N/A"}
+                                            </td>
+                                            <td className="border border-neutral-900 px-4 py-2">
+                                                {arrivalScheduled ? arrivalScheduled.toLocaleTimeString() : "N/A"}
+                                            </td>
+                                            <td className="border border-neutral-900 px-4 py-2">
+                                                {arrivalEstimated ? arrivalEstimated.toLocaleTimeString() : "N/A"}
+                                            </td>
+                                            <td
+                                                className={`border border-neutral-900 px-4 py-2 ${
+                                                    arrivalDelay > 0 ? "text-red-500" : "text-green-500"
+                                                }`}
+                                            >
+                                                {arrivalDelay !== null
+                                                    ? arrivalDelay > 0
+                                                        ? `Delayed by ${arrivalDelay} mins`
+                                                        : "On Time"
+                                                    : "N/A"}
+                                            </td>
+                                            <td className="border border-neutral-900 px-4 py-2">
+                                                {departureScheduled ? departureScheduled.toLocaleTimeString() : "N/A"}
+                                            </td>
+                                            <td className="border border-neutral-900 px-4 py-2">
+                                                {departureEstimated ? departureEstimated.toLocaleTimeString() : "N/A"}
+                                            </td>
+                                            <td
+                                                className={`border border-neutral-900 px-4 py-2 ${
+                                                    departureDelay > 0 ? "text-red-500" : "text-green-500"
+                                                }`}
+                                            >
+                                                {departureDelay !== null
+                                                    ? departureDelay > 0
+                                                        ? `Delayed by ${departureDelay} mins`
+                                                        : "On Time"
+                                                    : "N/A"}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             ))}
         </div>
