@@ -12,8 +12,8 @@ const ScheduleList = ({ schedule }) => {
   const now = new Date();
   console.log(schedule);
 
-  const combinedStops = currentSchedule["route-schedules"].flatMap(
-    (routeSchedule) =>
+  const combinedStops = currentSchedule["route-schedules"]
+    .flatMap((routeSchedule) =>
       routeSchedule["scheduled-stops"].map((stop) => {
         const arrivalEstimated = stop.times.arrival.estimated
           ? new Date(stop.times.arrival.estimated)
@@ -41,7 +41,12 @@ const ScheduleList = ({ schedule }) => {
           formattedArriveInTime,
         };
       })
-  );
+    )
+    .sort((a, b) =>
+      a.arrivalEstimated && b.arrivalEstimated
+        ? a.arrivalEstimated - b.arrivalEstimated
+        : 0
+    );
 
   return (
     <div className="p-4 mt-36">
