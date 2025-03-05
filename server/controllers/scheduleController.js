@@ -21,7 +21,7 @@ const fetchScheduleForStop = async (stops, routes) => {
     const response = await axios.get(API_URL);
     const scheduleData = response.data;
     let message = "";
-
+    const now = new Date();
     console.log(scheduleData);
     // Modify the response to add delay information
     scheduleData["stop-schedule"]["route-schedules"].forEach(
@@ -39,19 +39,26 @@ const fetchScheduleForStop = async (stops, routes) => {
           stop.delayMinutes = delayMinutes > 0 ? delayMinutes : 0;
           stop.earlyMinutes = delayMinutes < 0 ? Math.abs(delayMinutes) : 0; // Store as positive value
 
+          let arriveInTime = Math.round((arrivalEstimated - now) / (1000 * 60));
           if (delayMinutes > 0) {
             message += `🚨 Route ${routeSchedule.route.number} - ${
               routeSchedule.route.name
             } (${
               stop.variant.name
-            }) scheduled at ${arrivalScheduled.toLocaleTimeString()} is *delayed*, and will arrive in ${delayMinutes} minutes.\n`;
+            }) scheduled at ${arrivalScheduled.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })} is DELAYED, and will arrive in ${arriveInTime} minutes.\n`;
           } else if (delayMinutes < 0) {
             message += `✅ Route ${routeSchedule.route.number} - ${
               routeSchedule.route.name
             } (${
               stop.variant.name
-            }) scheduled at ${arrivalScheduled.toLocaleTimeString()} is *early*, and will arrive in ${Math.abs(
-              delayMinutes
+            }) scheduled at ${arrivalScheduled.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })} is EARLY, and will arrive in ${Math.abs(
+              arriveInTime
             )} minutes.\n`;
           }
         });

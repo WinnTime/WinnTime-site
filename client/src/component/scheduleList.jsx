@@ -177,6 +177,9 @@ const ScheduleList = ({ schedule }) => {
                   const arrivalEstimated = stop.times.arrival.estimated
                     ? new Date(stop.times.arrival.estimated)
                     : null;
+                  const arrivalScheduled = stop.times.arrival.estimated
+                    ? new Date(stop.times.arrival.scheduled)
+                    : null;
                   const arriveInTime = arrivalEstimated
                     ? Math.round((arrivalEstimated - now) / (1000 * 60))
                     : null;
@@ -188,6 +191,12 @@ const ScheduleList = ({ schedule }) => {
                           }m`
                         : `${arriveInTime} mins`
                       : "N/A";
+                  const arrivalDelay =
+                    arrivalEstimated && arrivalScheduled
+                      ? Math.round(
+                          (arrivalEstimated - arrivalScheduled) / (1000 * 60)
+                        )
+                      : null;
 
                   return (
                     <tr
@@ -220,9 +229,28 @@ const ScheduleList = ({ schedule }) => {
                             })
                           : "N/A"}
                       </td>
-                      <td className="border border-neutral-900 px-4 py-2">
-                        {stop.cancelled === "true" ? "Cancelled" : "On Time"}
+                      <td
+                        className={`border border-neutral-900 px-4 py-2 ${
+                          stop.cancelled === "true"
+                            ? "text-gray-500"
+                            : stop.isLate
+                            ? "text-red-500"
+                            : stop.isEarly
+                            ? "text-blue-500"
+                            : "text-green-500"
+                        }`}
+                      >
+                        {stop.cancelled === "true"
+                          ? "Cancelled"
+                          : arrivalDelay !== null
+                          ? stop.isLate
+                            ? `Delayed by ${arrivalDelay} mins`
+                            : stop.isEarly
+                            ? `Early by ${Math.abs(arrivalDelay)} mins`
+                            : "On Time"
+                          : "N/A"}
                       </td>
+
                       <td className="border border-neutral-900 px-4 py-2">
                         {formattedArriveInTime}
                       </td>
