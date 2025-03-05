@@ -5,31 +5,141 @@ const ScheduleList = ({ schedule }) => {
 
   useEffect(() => {
     setCurrentSchedule(schedule);
-  }, [schedule]); // Update state when schedule prop changes
+  }, [schedule]);
 
   if (!currentSchedule) return null;
 
-  const options = {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    timeZone: "America/Winnipeg",
-    timeZoneName: "short",
-    hour12: false, // Use 24-hour format
-  };
-
   const now = new Date();
-  console.log(now);
+  console.log(schedule);
+
+  const combinedStops = currentSchedule["route-schedules"].flatMap(
+    (routeSchedule) =>
+      routeSchedule["scheduled-stops"].map((stop) => {
+        const arrivalEstimated = stop.times.arrival.estimated
+          ? new Date(stop.times.arrival.estimated)
+          : null;
+        const arriveInTime = arrivalEstimated
+          ? Math.round((now - arrivalEstimated) / (1000 * 60))
+          : null;
+        const formattedArriveInTime =
+          arriveInTime !== null
+            ? arriveInTime >= 60
+              ? `${Math.floor(arriveInTime / 60)}h ${arriveInTime % 60}m`
+              : `${arriveInTime} mins`
+            : "N/A";
+
+        return {
+          routeNumber: routeSchedule.route?.number || "N/A",
+          destination: stop.variant?.name || "N/A",
+          arrivalScheduled: stop.times.arrival.scheduled
+            ? new Date(stop.times.arrival.scheduled)
+            : null,
+          arrivalEstimated,
+          cancelled: stop.cancelled,
+          isLate: stop.isLate,
+          isEarly: stop.isEarly,
+          formattedArriveInTime,
+        };
+      })
+  );
 
   return (
     <div className="p-4 mt-36">
       <h2 className="text-xl font-bold mb-4">
         Schedule for {currentSchedule.stop.name}
       </h2>
+
+      {/* Combined Table */}
+      <div className="overflow-x-auto mb-8">
+        <h3 className="text-lg font-semibold mb-2">All Routes Combined</h3>
+        <table className="min-w-full border border-neutral-900">
+          <thead>
+            <tr className="bg-neutral-900">
+              <th className="border border-neutral-900 px-4 py-2">Route</th>
+              <th className="border border-neutral-900 px-4 py-2">
+                Destination
+              </th>
+              <th className="border border-neutral-900 px-4 py-2">
+                Scheduled Arrival
+              </th>
+              <th className="border border-neutral-900 px-4 py-2">
+                Estimated Arrival
+              </th>
+              <th className="border border-neutral-900 px-4 py-2">Status</th>
+              <th className="border border-neutral-900 px-4 py-2">
+                Will Arrive In
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {combinedStops.map((stop, index) => {
+              const arrivalDelay =
+                stop.arrivalEstimated && stop.arrivalScheduled
+                  ? Math.round(
+                      (stop.arrivalEstimated - stop.arrivalScheduled) /
+                        (1000 * 60)
+                    )
+                  : null;
+
+              return (
+                <tr
+                  key={index}
+                  className="border-t border-neutral-900 odd:bg-neutral-700 even:bg-neutral-800"
+                >
+                  <td className="border border-neutral-900 px-4 py-2">
+                    {stop.routeNumber}
+                  </td>
+                  <td className="border border-neutral-900 px-4 py-2">
+                    {stop.destination}
+                  </td>
+                  <td className="border border-neutral-900 px-4 py-2">
+                    {stop.arrivalScheduled
+                      ? stop.arrivalScheduled.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "N/A"}
+                  </td>
+                  <td className="border border-neutral-900 px-4 py-2">
+                    {stop.arrivalEstimated
+                      ? stop.arrivalEstimated.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "N/A"}
+                  </td>
+                  <td
+                    className={`border border-neutral-900 px-4 py-2 ${
+                      stop.cancelled === "true"
+                        ? "text-gray-500"
+                        : stop.isLate
+                        ? "text-red-500"
+                        : stop.isEarly
+                        ? "text-blue-500"
+                        : "text-green-500"
+                    }`}
+                  >
+                    {stop.cancelled === "true"
+                      ? "Cancelled"
+                      : arrivalDelay !== null
+                      ? stop.isLate
+                        ? `Delayed by ${arrivalDelay} mins`
+                        : stop.isEarly
+                        ? `Early by ${Math.abs(arrivalDelay)} mins`
+                        : "On Time"
+                      : "N/A"}
+                  </td>
+                  <td className="border border-neutral-900 px-4 py-2">
+                    {stop.formattedArriveInTime}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Individual Route Tables */}
       {currentSchedule["route-schedules"].map((routeSchedule, index) => (
         <div key={index} className="mb-6">
           <h3 className="text-lg font-semibold mb-2">
@@ -47,124 +157,70 @@ const ScheduleList = ({ schedule }) => {
                     Scheduled Arrival
                   </th>
                   <th className="border border-neutral-900 px-4 py-2">
-                    {" "}
                     Estimated Arrival
                   </th>
                   <th className="border border-neutral-900 px-4 py-2">
                     Status
                   </th>
                   <th className="border border-neutral-900 px-4 py-2">
-                    Will Arrive in
+                    Will Arrive In
                   </th>
-                  {/* <th className="border border-neutral-900 px-4 py-2">Departure Scheduled</th>
-                                    <th className="border border-neutral-900 px-4 py-2">Departure Estimated</th>
-                                    <th className="border border-neutral-900 px-4 py-2">Departure Delay</th> */}
                 </tr>
               </thead>
               <tbody>
                 {routeSchedule["scheduled-stops"].map((stop, stopIndex) => {
-                  const arrivalScheduled = stop.times.arrival.scheduled
-                    ? new Date(stop.times.arrival.scheduled)
-                    : null;
                   const arrivalEstimated = stop.times.arrival.estimated
                     ? new Date(stop.times.arrival.estimated)
                     : null;
-                  const departureScheduled = stop.times.departure.scheduled
-                    ? new Date(stop.times.departure.scheduled)
+                  const arriveInTime = arrivalEstimated
+                    ? Math.round((now - arrivalEstimated) / (1000 * 60))
                     : null;
-                  const departureEstimated = stop.times.departure.estimated
-                    ? new Date(stop.times.departure.estimated)
-                    : null;
-
-                  console.log(now, "hello");
-                  console.log(arrivalEstimated, "hello");
-                  const arriveInTime =
-                    arrivalEstimated && now
-                      ? Math.round((now - arrivalEstimated) / (1000 * 60))
-                      : null;
-
-                  const arrivalDelay =
-                    arrivalEstimated && arrivalScheduled
-                      ? Math.round(
-                          (arrivalEstimated - arrivalScheduled) / (1000 * 60)
-                        )
-                      : null;
-
-                  const departureDelay =
-                    departureEstimated && departureScheduled
-                      ? Math.round(
-                          (departureEstimated - departureScheduled) /
-                            (1000 * 60)
-                        )
-                      : null;
+                  const formattedArriveInTime =
+                    arriveInTime !== null
+                      ? arriveInTime >= 60
+                        ? `${Math.floor(arriveInTime / 60)}h ${
+                            arriveInTime % 60
+                          }m`
+                        : `${arriveInTime} mins`
+                      : "N/A";
 
                   return (
                     <tr
                       key={stopIndex}
                       className="border-t border-neutral-900 odd:bg-neutral-700 even:bg-neutral-800"
                     >
-                      <td className="border border-neutral-900  px-4 py-2">
+                      <td className="border border-neutral-900 px-4 py-2">
                         {routeSchedule.route?.number || "N/A"}
                       </td>
-                      <td className="border border-neutral-900  px-4 py-2">
+                      <td className="border border-neutral-900 px-4 py-2">
                         {stop.variant?.name || "N/A"}
                       </td>
                       <td className="border border-neutral-900 px-4 py-2">
-                        {arrivalScheduled
-                          ? arrivalScheduled.toLocaleTimeString([], {
+                        {stop.times.arrival.scheduled
+                          ? new Date(
+                              stop.times.arrival.scheduled
+                            ).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })
                           : "N/A"}
                       </td>
                       <td className="border border-neutral-900 px-4 py-2">
-                        {arrivalEstimated
-                          ? arrivalEstimated.toLocaleTimeString([], {
+                        {stop.times.arrival.estimated
+                          ? new Date(
+                              stop.times.arrival.estimated
+                            ).toLocaleTimeString([], {
                               hour: "2-digit",
                               minute: "2-digit",
                             })
                           : "N/A"}
                       </td>
-                      <td
-                        className={`border border-neutral-900 px-4 py-2 
-                ${
-                  stop.isLate
-                    ? "text-red-500"
-                    : stop.isEarly
-                    ? "text-blue-500"
-                    : "text-green-500"
-                }
-            `}
-                      >
-                        {arrivalDelay !== null
-                          ? stop.isLate
-                            ? `Delayed by ${arrivalDelay} mins`
-                            : stop.isEarly
-                            ? `Early by ${Math.abs(arrivalDelay)} mins`
-                            : "On Time"
-                          : "N/A"}
+                      <td className="border border-neutral-900 px-4 py-2">
+                        {stop.cancelled === "true" ? "Cancelled" : "On Time"}
                       </td>
                       <td className="border border-neutral-900 px-4 py-2">
-                        {`${Math.abs(arriveInTime)} mins`}
+                        {formattedArriveInTime}
                       </td>
-                      {/* for departure data column */}
-                      {/* <td className="border border-neutral-900 px-4 py-2">
-                                                {departureScheduled ? departureScheduled.toLocaleTimeString() : "N/A"}
-                                            </td>
-                                            <td className="border border-neutral-900 px-4 py-2">
-                                                {departureEstimated ? departureEstimated.toLocaleTimeString() : "N/A"}
-                                            </td>
-                                            <td
-                                                className={`border border-neutral-900 px-4 py-2 ${
-                                                    departureDelay > 0 ? "text-red-500" : "text-green-500"
-                                                }`}
-                                            >
-                                                {departureDelay !== null
-                                                    ? departureDelay > 0
-                                                        ? `Delayed by ${departureDelay} mins`
-                                                        : "On Time"
-                                                    : "N/A"}
-                                            </td> */}
                     </tr>
                   );
                 })}
