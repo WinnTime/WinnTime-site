@@ -19,7 +19,7 @@ const ScheduleList = ({ schedule }) => {
           ? new Date(stop.times.arrival.estimated)
           : null;
         const arriveInTime = arrivalEstimated
-          ? Math.round((now - arrivalEstimated) / (1000 * 60))
+          ? Math.round((arrivalEstimated - now) / (1000 * 60))
           : null;
         const formattedArriveInTime =
           arriveInTime !== null
@@ -173,7 +173,7 @@ const ScheduleList = ({ schedule }) => {
                     ? new Date(stop.times.arrival.estimated)
                     : null;
                   const arriveInTime = arrivalEstimated
-                    ? Math.round((now - arrivalEstimated) / (1000 * 60))
+                    ? Math.round((arrivalEstimated - now) / (1000 * 60))
                     : null;
                   const formattedArriveInTime =
                     arriveInTime !== null
